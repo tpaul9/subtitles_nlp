@@ -6,6 +6,8 @@ from pathlib import Path
 
 from faster_whisper import WhisperModel
 
+from subtitle_repetition import has_runaway_repetition
+
 
 # ------------------------------------------------------------
 # Configuration
@@ -236,7 +238,13 @@ output_file = input_file.with_suffix(".srt")
 
 with open(output_file, "w", encoding="utf-8") as f:
 
-    for i, seg in enumerate(segments, start=1):
+    i = 0
+    for seg in segments:
+        text = seg.text.strip()
+        if has_runaway_repetition(text):
+            continue
+
+        i += 1
         f.write(f"{i}\n")
 
         f.write(
@@ -244,7 +252,7 @@ with open(output_file, "w", encoding="utf-8") as f:
             f"{format_timestamp(seg.end)}\n"
         )
 
-        f.write(seg.text.strip())
+        f.write(text)
         f.write("\n\n")
 
 

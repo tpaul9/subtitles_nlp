@@ -7,6 +7,8 @@ from pathlib import Path
 from fugashi import Tagger
 from pykakasi import kakasi
 
+from subtitle_repetition import has_runaway_repetition
+
 
 # ------------------------------------------------------------
 # Configuration
@@ -522,14 +524,19 @@ print("Converting Japanese to romaji...")
 romaji_subtitles = []
 
 for subtitle in japanese_subtitles:
+    text = subtitle["text"]
+    if has_runaway_repetition(text):
+        continue
+
+    romaji = japanese_to_romaji(text)
+    if has_runaway_repetition(romaji):
+        continue
 
     romaji_subtitles.append(
         {
             "start": subtitle["start"],
             "end": subtitle["end"],
-            "text": japanese_to_romaji(
-                subtitle["text"]
-            ),
+            "text": romaji,
         }
     )
 
